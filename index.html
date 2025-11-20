@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Уровень стресса</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100vh;
+    background: #e8f4ff;
+    margin: 0;
+    padding-top: 40px;
+}
+
+.container {
+    display: flex;
+    align-items: flex-start;
+    gap: 60px;
+    background: #fff;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 25px rgba(0,0,0,0.1);
+    transition: background 0.3s ease;
+    position: relative;
+    height: 300px;
+}
+
+.thermometer {
+    width: 60px;
+    height: 100%;
+    border-radius: 30px;
+    background: linear-gradient(
+        to top,
+        #4CAF50 0%,
+        #8BC34A 14%,
+        #FFEB3B 28%,
+        #FFC107 42%,
+        #FF5722 57%,
+        #F44336 71%,
+        #800000 85%,
+        #0D47A1 100%
+    );
+}
+
+.range-wrapper {
+    position: relative;
+    height: 100%;
+}
+
+input[type=range] {
+    writing-mode: bt-lr;
+    -webkit-appearance: slider-vertical;
+    width: 300px;
+    height: 100%;
+    margin: 0 0 0 20px;
+}
+
+.smiley {
+    position: absolute;
+    left: -50px;
+    font-size: 36px;
+    transition: top 0.2s;
+}
+
+.label {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* Правая панель галочек */
+.checkboxes-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+.checkboxes-right input {
+    transform: scale(1.1);
+}
+
+.checkboxes-right .title {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+#submitBtn {
+    margin-top: 20px;
+    padding: 10px 25px;
+    font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background-color: #2196F3;
+    color: white;
+}
+#submitBtn:hover {
+    background-color: #1976D2;
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="box">
+    <div class="smiley" id="smiley">😊</div>
+    <div class="thermometer"></div>
+    <div class="range-wrapper">
+        <input type="range" min="1" max="8" value="1" id="stressRange">
+    </div>
+
+    <div class="checkboxes-right">
+        <div class="title">Цёмнуть сегодня</div>
+
+        <div class="kiss-wrapper" style="display:flex; align-items:center; gap:5px;">
+            <label class="kiss-lips" style="display:none;">
+                <input type="checkbox" id="lips">
+                <span>💋</span>
+            </label>
+
+            <label class="main-kiss">
+                <input type="checkbox" id="kiss">
+                <span>Цёмнуть 😘</span>
+            </label>
+        </div>
+
+        <label class="main-nope">
+            <input type="checkbox" id="nope">
+            <span>Обойдёшься 😏</span>
+        </label>
+    </div>
+</div>
+
+<div class="label" id="label">Люблю всех</div>
+
+<button id="submitBtn">Пожаловаться Леше</button>
+
+<script>
+const range = document.getElementById("stressRange");
+const smiley = document.getElementById("smiley");
+const label = document.getElementById("label");
+const box = document.getElementById("box");
+
+const states = {
+    1: ["😊", "Люблю всех"],
+    2: ["🙂", "Мне просто хорошо"],
+    3: ["😐", "Напряг"],
+    4: ["😣", "Отойдите от меня"],
+    5: ["😡", "Пошлю нахуй"],
+    6: ["😤", "Сломаю колени"],
+    7: ["💥", "Дайте ядерную кнопку"],
+    8: ["⚰️", "Хэллоуин"]
+};
+
+const colors = {
+    1: "#4CAF50",
+    2: "#8BC34A",
+    3: "#FFEB3B",
+    4: "#FFC107",
+    5: "#FF5722",
+    6: "#F44336",
+    7: "#800000",
+    8: "#0D47A1"
+};
+
+range.addEventListener("input", () => {
+    const value = parseInt(range.value);
+    label.textContent = states[value][1];
+    smiley.textContent = states[value][0];
+    box.style.background = colors[value];
+
+    const containerHeight = box.clientHeight;
+    const offset = ((value - 1) / 7) * (containerHeight - 36);
+    smiley.style.top = containerHeight - offset - 36 + "px";
+});
+
+const kissCheckbox = document.getElementById("kiss");
+const lipsCheckbox = document.getElementById("lips");
+const nopeCheckbox = document.getElementById("nope");
+
+kissCheckbox.addEventListener("change", () => {
+    lipsCheckbox.parentElement.style.display = kissCheckbox.checked ? "flex" : "none";
+    if (kissCheckbox.checked) nopeCheckbox.checked = false;
+});
+
+nopeCheckbox.addEventListener("change", () => {
+    if (nopeCheckbox.checked) {
+        kissCheckbox.checked = false;
+        lipsCheckbox.parentElement.style.display = "none";
+        lipsCheckbox.checked = false;
+    }
+});
+
+const submitBtn = document.getElementById("submitBtn");
+
+submitBtn.addEventListener("click", () => {
+    const data = {
+        level: range.value,
+        emoji: smiley.textContent,
+        kiss: kissCheckbox.checked,
+        lips: lipsCheckbox.checked,
+        nope: nopeCheckbox.checked
+    };
+
+    fetch("https://script.google.com/macros/s/AKfycbyDZhZvnY3gXs7hyVYgiDHNOXX7oTEBHx41QLFwrkXbCP5KWk_e942pI_0XkOlixIj_/exec", {
+        method: "POST",
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        alert("Результат отправлен!");
+    })
+    .catch(error => {
+        console.error("Ошибка:", error);
+        alert("Ошибка при отправке данных.");
+    });
+});
+</script>
+
+</body>
+</html>
